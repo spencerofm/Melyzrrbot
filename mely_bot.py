@@ -51,14 +51,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     photo_url = "https://raw.githubusercontent.com/spencerofm/Melyzrrbot/main/IMG_5618.jpeg"
     message_text = (
-        "ð¨ Tâas dÃ©jÃ  vu une ASIATIQUE avec des ÃNORMES SEINS ?
-
-"
-        "Jâai dÃ» crÃ©er 5 nouveaux comptes Instaâ¦ Si tu tâabonnes aux 5, je tâenvoie une surprise interdite aux mineurs ð
-
-"
-        "ð Tâas juste Ã  cliquer sur les boutons pour tâabonner. Et clique sur le dernier une fois que câest fait pour recevoir ta surprise ð"
-    )
+caption = (
+    "🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?\n\n"
+    "J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, je t’envoie une surprise interdite aux mineurs 🔞\n\n"
+    "👇 T’as juste à cliquer sur les boutons pour t’abonner. Et clique sur le dernier une fois que c’est fait pour recevoir ta surprise 💋"
+)
 
     keyboard = [
         [InlineKeyboardButton("ð¸ Insta 1", url=INSTAGRAM_URLS[0])],
