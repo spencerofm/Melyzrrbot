@@ -50,7 +50,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot_manager.add_user(user.id, user.username, user.first_name)
 
     photo_url = "https://raw.githubusercontent.com/spencerofm/Melyzrrbot/main/IMG_5618.jpeg"
-    message_text = (
 caption = (
     "🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?\n\n"
     "J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, je t’envoie une surprise interdite aux mineurs 🔞\n\n"
