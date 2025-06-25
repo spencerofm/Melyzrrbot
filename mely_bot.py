@@ -5,7 +5,7 @@ from datetime import datetime
 
 # TOKEN (déjà corrigé précédemment dans ta version)
 TOKEN = "7714076813:AAEDEukD5q88c9mUHnvl0xEoN-5mQr-XQJ0"
-ADMIN_ID = 21507
+ADMIN_ID = 5845745503
 
 # Configuration logging
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
