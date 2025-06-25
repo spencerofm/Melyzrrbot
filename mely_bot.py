@@ -86,18 +86,11 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
 
-    total, active = bot_manager.get_stats()
-    await update.message.reply_text(
-        f"ð Stats bot:
-
-"
-        f"ð¥ Total utilisateurs: {total}
-"
-        f"â Actifs: {active}
-"
-        f"ð MAJ: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
-    )
-
+    total, active = bot_manager.get_await update.message.reply_text(
+    f"📊 Stats bot:\n\n"
+    f"👥 Total utilisateurs: {total}\n"
+    f"✅ Actifs: {active}\n"
+)
 # /broadcast
 async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
