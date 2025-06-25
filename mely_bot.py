@@ -130,62 +130,67 @@ async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Commande réservée à l’admin.")
         return
 
-    photo = None
+    media_type = None
+    media_file_id = None
     caption = ""
 
-    # Cas 1 : Réponse à une photo avec commande
-    if update.message.reply_to_message and update.message.reply_to_message.photo:
-        photo = update.message.reply_to_message.photo[-1].file_id
-        # Récupère le texte après la commande
+    # Cas 1 : Répond à une photo ou une vidéo
+    if update.message.reply_to_message:
+        reply = update.message.reply_to_message
+        if reply.photo:
+            media_type = "photo"
+            media_file_id = reply.photo[-1].file_id
+        elif reply.video:
+            media_type = "video"
+            media_file_id = reply.video.file_id
+
         parts = update.message.text.split(' ', 1)
         if len(parts) > 1:
             caption = parts[1]
 
-    # Cas 2 : Photo envoyée avec la commande (dans le caption)
+    # Cas 2 : Envoie direct avec légende
     elif update.message.photo:
-        photo = update.message.photo[-1].file_id
+        media_type = "photo"
+        media_file_id = update.message.photo[-1].file_id
         if update.message.caption:
-            # Enlève la commande du début si elle y est
-            caption = update.message.caption
-            if caption.startswith('/broadcast_image'):
-                caption = caption.replace('/broadcast_image', '').strip()
+            caption = update.message.caption.replace('/broadcast_image', '').strip()
+
+    elif update.message.video:
+        media_type = "video"
+        media_file_id = update.message.video.file_id
+        if update.message.caption:
+            caption = update.message.caption.replace('/broadcast_image', '').strip()
 
     else:
-        await update.message.reply_text("❌ Tu dois répondre à une photo avec la commande ou envoyer une photo avec la commande dans le caption.")
+        await update.message.reply_text("❌ Tu dois répondre à une photo/vidéo ou en envoyer une avec un message.")
         return
 
-    if not photo:
-        await update.message.reply_text("❌ Aucune photo trouvée.")
+    if not media_file_id:
+        await update.message.reply_text("❌ Aucun média trouvé.")
         return
 
-    # Utilise bot_manager.get_active_users() au lieu de user_ids
     users = bot_manager.get_active_users()
-
     if not users:
         await update.message.reply_text("❌ Aucun utilisateur actif.")
         return
 
-    # Message de confirmation
-    await update.message.reply_text(f"📤 Diffusion de la photo en cours vers {len(users)} utilisateurs...")
+    await update.message.reply_text(f"📤 Diffusion du média en cours vers {len(users)} utilisateurs...")
 
-    # Envoie la photo avec caption à tous les abonnés
     sent = 0
     failed = 0
 
     for user_id in users:
         try:
-            await context.bot.send_photo(
-                chat_id=int(user_id), 
-                photo=photo, 
-                caption=caption if caption else None
-            )
+            if media_type == "photo":
+                await context.bot.send_photo(chat_id=int(user_id), photo=media_file_id, caption=caption or None)
+            elif media_type == "video":
+                await context.bot.send_video(chat_id=int(user_id), video=media_file_id, caption=caption or None)
             sent += 1
-            await asyncio.sleep(0.1)  # Petit délai pour éviter les limites de taux
+            await asyncio.sleep(0.1)
         except Exception as e:
             failed += 1
             logger.error(f"Erreur en envoyant à {user_id} : {e}")
 
-    # Rapport final
     await update.message.reply_text(
         f"✅ Diffusion terminée !\n"
         f"📤 Envoyés : {sent}\n"
