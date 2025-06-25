@@ -90,14 +90,14 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     total, active = bot_manager.get_stats()
     await update.message.reply_text(
-        f"📊 Stats bot:
+        f"""📊 Stats bot:
 
 "
         f"👥 Total utilisateurs: {total}
 "
         f"✅ Actifs: {active}
 "
-        f"📅 MAJ: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        f"📅 MAJ: {datetime.now().strftime('%d/%m/%Y %H:%M')}"""
     )
 
 # /broadcast pour envoyer un message groupé
