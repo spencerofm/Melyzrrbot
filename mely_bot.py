@@ -151,7 +151,7 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     total, active = bot_manager.get_stats()
     await update.message.reply_text(
-        f"👥 Total : {total} utilisateurs
+        f"👥 Total : {total} utilisateurs"
 ✅ Actifs : {active}
 ❌ Désabonnés : {total - active}"
     )
