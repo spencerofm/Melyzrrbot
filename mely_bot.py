@@ -79,7 +79,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     welcome_text = MESSAGES['welcome']
 
-    photo_url = "https://i.imgur.com/bVc9FTj.jpeg"
+photo_url = "https://i.imgur.com/R2aqZ08.jpeg"
 
     try:
         await update.message.reply_photo(
