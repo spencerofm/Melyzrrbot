@@ -127,7 +127,7 @@ async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if update.effective_user.id != ADMIN_ID:
-await update.message.reply_text(“❌ Commande réservée à l’admin.”)
+await update.message.reply_text("❌ Commande réservée à l’admin.")
 return
 
 photo = None
