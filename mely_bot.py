@@ -101,8 +101,8 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return await update.message.reply_text("❌ Commande réservée à l’admin.")
     total, active = bot_manager.get_stats()
-    text = f"📊 Total utilisateurs : {total}
-✅ Actifs : {active}"
+    text = f"""📊 Total utilisateurs : {total}
+✅ Actifs : {active}"""
     await update.message.reply_text(text)
 
 # /broadcast
