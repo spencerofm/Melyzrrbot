@@ -89,7 +89,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("ð Ouvrir Instagram", url=url)],
                         [InlineKeyboardButton("â¬ï¸ Retour", callback_data='back_to_menu')]]
             await query.edit_message_caption(
-                caption=f"Voici le lien vers mon Insta {index} :
+                caption=f"Voici le lien vers mon Insta {index} : {instagram_url}"
 {url}",
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
