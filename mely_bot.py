@@ -45,8 +45,8 @@ J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, je t’en
 
 👇 T’as juste à cliquer sur les boutons pour t’abonner. Et clique sur le dernier une fois que c’est fait pour recevoir ta surprise 💋""",
     "surprise": "🔞 Voici ta surprise : https://t.me/MelySurprise 🔥",
-    "help_admin": "/stats – Voir le nombre d’utilisateurs
-/broadcast [message] – Envoyer à tous les utilisateurs"
+    "help_admin": "/stats – Voir le nombre d’utilisateurs"
+"/broadcast [message] – Envoyer à tous les utilisateurs"
 }
 
 # Charger les utilisateurs
