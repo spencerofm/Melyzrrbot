@@ -1,8 +1,7 @@
-
 import asyncio
 import logging
 from datetime import datetime
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -12,74 +11,72 @@ from telegram.ext import (
     filters,
 )
 
-TOKEN = "7714076813:AAFrzgdzZDXD2KKfD5_rpOF-ltK4Hy2HmTg"
-ADMIN_ID = 5845745503  # à modifier si besoin
+# ====== CONFIG ======
+TOKEN = "7714076813:AAFrzgdzZDXD2KfD5_rpOF-1tK4Hy2HmTog"
+ADMIN_ID = 5845745503  # ton ID perso admin
 
+# ====== LOGGING ======
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ====== LIENS INSTA ======
 INSTAGRAM_URLS = {
-    'insta1': 'https://instagram.com/melykxr',
-    'insta2': 'https://instagram.com/melyzrr02',
-    'insta3': 'https://instagram.com/_melybbz',
-    'insta4': 'https://instagram.com/melypzr',
-    'insta5': 'https://instagram.com/melykdz'
+    'insta1': 'https://instagram.com/melyxrr',
+    'insta2': 'https://instagram.com/melyzrr',
+    'insta3': 'https://instagram.com/_melyzr',
+    'insta4': 'https://instagram.com/melypartage',
+    'insta5': 'https://instagram.com/melyko',
 }
 
+# ====== MESSAGES ======
 MESSAGES = {
-    'welcome': """🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?
-
-J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, je t’envoie une surprise interdite aux mineurs 🔞
-
-👇 T’as juste à cliquer sur les boutons pour t’abonner. Et clique sur le dernier une fois que c’est fait pour recevoir ta surprise 💋""",
-    'button_labels': [
-        "📸 Insta 1",
-        "📸 Insta 2",
-        "📸 Insta 3",
-        "📸 Insta 4",
-        "📸 Insta 5",
-        "✅ C’est fait, envoie la surprise 🔥"
-    ]
+    'welcome': (
+        "🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?\n\n"
+        "J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, "
+        "je t’envoie une surprise interdite aux mineurs 😈\n\n"
+        "👇 T’as juste à cliquer sur les boutons pour t’abonner. "
+        "Et clique sur le dernier une fois que c’est fait pour recevoir ta surprise 💋"
+    ),
+    'done': "🔥 Bien joué 😏 ! La surprise arrive très vite…"
 }
 
+# ====== GESTION USERS ======
 class BotManager:
     def __init__(self):
         self.users = {}
 
-    def add_user(self, user_id, username=None, first_name=None):
-        self.users[str(user_id)] = {
-            'username': username,
-            'first_name': first_name,
-            'joined_date': datetime.now().isoformat(),
-            'active': True
+    def add_user(self, user_id, username):
+        self.users[user_id] = {
+            "username": username,
+            "joined": datetime.now(),
+            "active": True
         }
 
-    def deactivate_user(self, user_id):
-        if str(user_id) in self.users:
-            self.users[str(user_id)]['active'] = False
-
     def get_active_users(self):
-        return [user_id for user_id, data in self.users.items() if data.get('active', True)]
+        return [u for u in self.users.values() if u["active"]]
 
 bot_manager = BotManager()
 
+# ====== HANDLER START ======
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    bot_manager.add_user(user.id, user.username, user.first_name)
+    user_id = user.id
+    username = user.username or "inconnu"
 
-    keyboard = []
+    bot_manager.add_user(user_id, username)
 
-    for i in range(5):
-        button_text = MESSAGES['button_labels'][i]
-        url = INSTAGRAM_URLS[f"insta{i+1}"]
-        keyboard.append([InlineKeyboardButton(button_text, url=url)])
-
-    keyboard.append([InlineKeyboardButton(MESSAGES['button_labels'][5], callback_data='done')])
+    keyboard = [
+        [InlineKeyboardButton("📸 Insta 1", url=INSTAGRAM_URLS['insta1'])],
+        [InlineKeyboardButton("📸 Insta 2", url=INSTAGRAM_URLS['insta2'])],
+        [InlineKeyboardButton("📸 Insta 3", url=INSTAGRAM_URLS['insta3'])],
+        [InlineKeyboardButton("📸 Insta 4", url=INSTAGRAM_URLS['insta4'])],
+        [InlineKeyboardButton("📸 Insta 5", url=INSTAGRAM_URLS['insta5'])],
+        [InlineKeyboardButton("✅ C’est fait, envoie la surprise 🔥", callback_data="done")]
+    ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     welcome_text = MESSAGES['welcome']
-
-photo_url = "https://i.imgur.com/R2aqZ08.jpeg"
+    photo_url = "https://i.imgur.com/R2aqZ08.jpeg"  # Image de Mely en rouge
 
     try:
         await update.message.reply_photo(
@@ -91,25 +88,33 @@ photo_url = "https://i.imgur.com/R2aqZ08.jpeg"
         logger.error(f"Erreur envoi photo: {e}")
         await update.message.reply_text(welcome_text, reply_markup=reply_markup)
 
+# ====== CALLBACK BUTTON ======
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
     if query.data == "done":
         await query.edit_message_reply_markup(reply_markup=None)
+        await query.message.reply_text(MESSAGES['done'])
 
+# ====== STATS ADMIN ======
 async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
+
     total = len(bot_manager.users)
     active = len(bot_manager.get_active_users())
-    stats = f"👥 Utilisateurs : {total} (actifs : {active})"
+    stats = f"📊 Utilisateurs : {total}\n✅ Actifs : {active}"
     await update.message.reply_text(stats)
 
+# ====== MAIN ======
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
+
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(CommandHandler("stats", admin_stats))
+
     print("✅ Bot lancé")
     app.run_polling()
 
