@@ -114,11 +114,11 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     total, active = bot_manager.get_stats()
     await update.message.reply_text(
-        f"📊 Stats bot:
+        f"""📊 Stats bot:
 
 👥 Total utilisateurs: {total}
 ✅ Actifs: {active}
-📅 MAJ: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+📅 MAJ: {datetime.now().strftime('%d/%m/%Y %H:%M')}"""
     )
 
 async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
