@@ -125,22 +125,34 @@ async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(f"✅ Message envoyé à {sent} utilisateurs")
 
-# === /broadcast_image COMMAND ===
+@dp.message_handler(commands=['broadcast_image'])
 async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
+
+    # Vérifie qu'on répond à un message avec une photo
     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
-        await update.message.reply_text("❌ Tu dois répondre à une photo avec cette commande.")
+        await update.message.reply_text("❌ Tu dois répondre à une **photo** avec cette commande.")
+        return
+
+    # Vérifie que t'as mis un texte après la commande
+    if len(update.message.text.split(' ', 1)) < 2:
+        await update.message.reply_text("❌ Tu dois écrire un **texte** après la commande.")
         return
 
     caption = update.message.text.split(' ', 1)[1]
     photo = update.message.reply_to_message.photo[-1].file_id
 
+    success = 0
     for user_id in user_ids:
         try:
             await context.bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
-        except:
+            success += 1
+        except Exception as e:
+            print(f"Erreur pour {user_id} : {e}")
             pass
+
+    await update.message.reply_text(f"✅ Message envoyé à {success} abonnés.")
 
 # main
 def main():
