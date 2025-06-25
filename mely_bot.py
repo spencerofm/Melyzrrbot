@@ -49,7 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     bot_manager.add_user(user.id, user.username)
 
-    photo_url = "https://raw.githubusercontent.com/spencerofm/Melyzrrbot/main/mely_start.jpg"
+    photo_url = "https://raw.githubusercontent.com/spencerofm/Melyzrrbot/refs/heads/main/IMG_5618.jpeg"
     caption = (
         "🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?"
 
