@@ -12,7 +12,7 @@ from telegram.ext import (
 )
 
 # ====== CONFIG ======
-TOKEN = "7714076813:AAFrzgdzZDXD2KfD5_rpOF-1tK4Hy2HmTog"
+TOKEN = "7714076813:AAEDEukD5q88c9mUHnvl0xEoN-5mQr-XQJ0"
 ADMIN_ID = 5845745503  # ton ID perso admin
 
 # ====== LOGGING ======
