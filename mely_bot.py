@@ -37,7 +37,7 @@ MESSAGES = {
         "👇 T’as juste à cliquer sur les boutons pour t’abonner. "
         "Et clique sur le dernier une fois que c’est fait pour recevoir ta surprise 💋"
     ),
-    'done': "🔥 Bien joué 😏 ! La surprise arrive très vite…"
+    'done': "🔥 Bien joué 😏 ! La surprise arrive très vite laisse moi juste vérifier que tu t'es bien abonné aux 5 comptes insta"
 }
 
 # ====== GESTION USERS ======
@@ -76,7 +76,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     welcome_text = MESSAGES['welcome']
-    photo_url = "https://i.imgur.com/R2aqZ08.jpeg"  # Image de Mely en rouge
+    photo_url = "https://i.imgur.com/R2aqZ08.jpeg?2"  # Image de Mely en rouge
 
     try:
         await update.message.reply_photo(
