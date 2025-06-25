@@ -125,41 +125,74 @@ async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(f"✅ Message envoyé à {sent} utilisateurs")
 
-from telegram import Update
-from telegram.ext import ContextTypes
-
-# Assure-toi que ADMIN_ID et user_ids sont bien définis quelque part au-dessus
-
 async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID:
-        return
+if update.effective_user.id != ADMIN_ID:
+await update.message.reply_text(“❌ Commande réservée à l’admin.”)
+return
 
-    # Vérifie s'il y a un message après la commande
+```
+photo = None
+caption = ""
+
+# Cas 1 : Réponse à une photo avec commande
+if update.message.reply_to_message and update.message.reply_to_message.photo:
+    photo = update.message.reply_to_message.photo[-1].file_id
+    # Récupère le texte après la commande
     parts = update.message.text.split(' ', 1)
-    if len(parts) < 2:
-        await update.message.reply_text("❌ Tu dois ajouter un message après la commande.")
-        return
-    caption = parts[1]
+    if len(parts) > 1:
+        caption = parts[1]
 
-    # Cas 1 : Réponse à une photo
-    if update.message.reply_to_message and update.message.reply_to_message.photo:
-        photo = update.message.reply_to_message.photo[-1].file_id
+# Cas 2 : Photo envoyée avec la commande (dans le caption)
+elif update.message.photo:
+    photo = update.message.photo[-1].file_id
+    if update.message.caption:
+        # Enlève la commande du début si elle y est
+        caption = update.message.caption
+        if caption.startswith('/broadcast_image'):
+            caption = caption.replace('/broadcast_image', '').strip()
 
-    # Cas 2 : Photo envoyée avec la commande
-    elif update.message.photo:
-        photo = update.message.photo[-1].file_id
+else:
+    await update.message.reply_text("❌ Tu dois répondre à une photo avec la commande ou envoyer une photo avec la commande dans le caption.")
+    return
 
-    else:
-        await update.message.reply_text("❌ Tu dois répondre à une photo ou en envoyer une avec la commande.")
-        return
+if not photo:
+    await update.message.reply_text("❌ Aucune photo trouvée.")
+    return
 
-    # Envoie la photo avec caption à tous les abonnés
-    for user_id in user_ids:
-        try:
-            await context.bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
-        except Exception as e:
-            print(f"Erreur en envoyant à {user_id} : {e}")
+# Utilise bot_manager.get_active_users() au lieu de user_ids
+users = bot_manager.get_active_users()
 
+if not users:
+    await update.message.reply_text("❌ Aucun utilisateur actif.")
+    return
+
+# Message de confirmation
+await update.message.reply_text(f"📤 Diffusion de la photo en cours vers {len(users)} utilisateurs...")
+
+# Envoie la photo avec caption à tous les abonnés
+sent = 0
+failed = 0
+
+for user_id in users:
+    try:
+        await context.bot.send_photo(
+            chat_id=int(user_id), 
+            photo=photo, 
+            caption=caption if caption else None
+        )
+        sent += 1
+        await asyncio.sleep(0.1)  # Petit délai pour éviter les limites de taux
+    except Exception as e:
+        failed += 1
+        logger.error(f"Erreur en envoyant à {user_id} : {e}")
+
+# Rapport final
+await update.message.reply_text(
+    f"✅ Diffusion terminée !\n"
+    f"📤 Envoyés : {sent}\n"
+    f"❌ Échecs : {failed}"
+)
+```
 # main
 def main():
     app = Application.builder().token(TOKEN).build()
