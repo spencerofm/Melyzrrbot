@@ -125,32 +125,40 @@ async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(f"✅ Message envoyé à {sent} utilisateurs")
 
-# === /broadcast_image COMMAND ===
 from telegram import Update
-from telegram.ext import CommandHandler, ContextTypes
+from telegram.ext import ContextTypes
 
-# Ajoute cette fonction dans ton fichier
+# Assure-toi que ADMIN_ID et user_ids sont bien définis quelque part au-dessus
+
 async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
 
-    if not update.message.reply_to_message or not update.message.reply_to_message.photo:
-        await update.message.reply_text("❌ Tu dois répondre à une photo avec cette commande.")
-        return
-
-    try:
-        caption = update.message.text.split(' ', 1)[1]  # Récupère le texte après la commande
-    except IndexError:
+    # Vérifie s'il y a un message après la commande
+    parts = update.message.text.split(' ', 1)
+    if len(parts) < 2:
         await update.message.reply_text("❌ Tu dois ajouter un message après la commande.")
         return
+    caption = parts[1]
 
-    photo = update.message.reply_to_message.photo[-1].file_id
+    # Cas 1 : Réponse à une photo
+    if update.message.reply_to_message and update.message.reply_to_message.photo:
+        photo = update.message.reply_to_message.photo[-1].file_id
 
+    # Cas 2 : Photo envoyée avec la commande
+    elif update.message.photo:
+        photo = update.message.photo[-1].file_id
+
+    else:
+        await update.message.reply_text("❌ Tu dois répondre à une photo ou en envoyer une avec la commande.")
+        return
+
+    # Envoie la photo avec caption à tous les abonnés
     for user_id in user_ids:
         try:
             await context.bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
-        except:
-            pass
+        except Exception as e:
+            print(f"Erreur en envoyant à {user_id} : {e}")
 
 # main
 def main():
