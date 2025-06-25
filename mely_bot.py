@@ -1,20 +1,20 @@
 import asyncio
 import logging
+import json
+import os
 from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# Token et admin ID
 TOKEN = "7714076813:AAEDEukD5q88c9mUHnvl0xEoN-5mQr-XQJ0"
 ADMIN_ID = 5845745503
+USER_FILE = "users.json"
 
-# Configuration des logs
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# URLs Instagram
 INSTAGRAM_URLS = {
     "insta1": "https://instagram.com/melykxr",
     "insta2": "https://instagram.com/melyzrr02",
@@ -23,17 +23,16 @@ INSTAGRAM_URLS = {
     "insta5": "https://instagram.com/melykdz",
 }
 
-# Message principal
 WELCOME_MESSAGE = """🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?
 
 J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, je t’envoie une surprise interdite aux mineurs 🔞
 
 👇 T’as juste à cliquer sur les boutons pour t’abonner. Et clique sur le dernier une fois que c’est fait pour recevoir ta surprise 💋"""
 
-# Gestion utilisateurs
 class BotManager:
     def __init__(self):
         self.users = {}
+        self.load()
 
     def add_user(self, user_id, username=None, first_name=None):
         self.users[str(user_id)] = {
@@ -42,6 +41,7 @@ class BotManager:
             "joined_date": datetime.now().isoformat(),
             "active": True,
         }
+        self.save()
 
     def get_active_users(self):
         return [user_id for user_id, data in self.users.items() if data.get("active", True)]
@@ -51,9 +51,23 @@ class BotManager:
         active = len(self.get_active_users())
         return total, active
 
+    def save(self):
+        try:
+            with open(USER_FILE, "w") as f:
+                json.dump(self.users, f, indent=2)
+        except Exception as e:
+            logger.error(f"Erreur sauvegarde fichier users.json: {e}")
+
+    def load(self):
+        if os.path.exists(USER_FILE):
+            try:
+                with open(USER_FILE, "r") as f:
+                    self.users = json.load(f)
+            except Exception as e:
+                logger.error(f"Erreur chargement fichier users.json: {e}")
+
 bot_manager = BotManager()
 
-# /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     bot_manager.add_user(user.id, user.username, user.first_name)
@@ -74,7 +88,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         await update.message.reply_text(WELCOME_MESSAGE, reply_markup=reply_markup)
 
-# Handler pour les boutons
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -96,7 +109,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         await query.edit_message_caption(caption=WELCOME_MESSAGE, reply_markup=InlineKeyboardMarkup(keyboard))
 
-# /stats
 async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return await update.message.reply_text("❌ Commande réservée à l’admin.")
@@ -105,7 +117,6 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ✅ Actifs : {active}"""
     await update.message.reply_text(text)
 
-# /broadcast
 async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return await update.message.reply_text("❌ Commande réservée à l’admin.")
@@ -134,7 +145,6 @@ async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     media_file_id = None
     caption = ""
 
-    # Cas 1 : Répond à une photo ou une vidéo
     if update.message.reply_to_message:
         reply = update.message.reply_to_message
         if reply.photo:
@@ -148,7 +158,6 @@ async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(parts) > 1:
             caption = parts[1]
 
-    # Cas 2 : Envoie direct avec légende
     elif update.message.photo:
         media_type = "photo"
         media_file_id = update.message.photo[-1].file_id
@@ -196,7 +205,7 @@ async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📤 Envoyés : {sent}\n"
         f"❌ Échecs : {failed}"
     )
-# main
+
 def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
