@@ -127,10 +127,9 @@ async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if update.effective_user.id != ADMIN_ID:
-await update.message.reply_text("❌ Commande réservée à l’admin.")
+await update.message.reply_text(“❌ Commande réservée à l’admin.”)
 return
 
-```
 photo = None
 caption = ""
 
@@ -192,7 +191,7 @@ await update.message.reply_text(
     f"📤 Envoyés : {sent}\n"
     f"❌ Échecs : {failed}"
 )
-```
+
 # main
 def main():
     app = Application.builder().token(TOKEN).build()
