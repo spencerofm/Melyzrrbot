@@ -125,6 +125,23 @@ async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(f"✅ Message envoyé à {sent} utilisateurs")
 
+# === /broadcast_image COMMAND ===
+async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    if not update.message.reply_to_message or not update.message.reply_to_message.photo:
+        await update.message.reply_text("❌ Tu dois répondre à une photo avec cette commande.")
+        return
+
+    caption = update.message.text.split(' ', 1)[1]
+    photo = update.message.reply_to_message.photo[-1].file_id
+
+    for user_id in user_ids:
+        try:
+            await context.bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
+        except:
+            pass
+
 # main
 def main():
     app = Application.builder().token(TOKEN).build()
