@@ -51,10 +51,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     photo_url = "https://raw.githubusercontent.com/spencerofm/Melyzrrbot/main/mely_start.jpg"
     caption = (
-        "🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?
+        "🚨 T’as déjà vu une ASIATIQUE avec des ÉNORMES SEINS ?"
 
 "
-        "J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, je t’envoie une surprise interdite aux mineurs 🔞
+        "J’ai dû créer 5 nouveaux comptes Insta… Si tu t’abonnes aux 5, je t’envoie une surprise interdite aux mineurs 🔞"
 
 "
         "👇 T’as juste à cliquer sur les boutons pour t’abonner. Et clique sur le dernier une fois que c’est fait pour recevoir ta surprise 💋"
