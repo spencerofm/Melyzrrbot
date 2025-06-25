@@ -126,6 +126,10 @@ async def admin_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"✅ Message envoyé à {sent} utilisateurs")
 
 # === /broadcast_image COMMAND ===
+from telegram import Update
+from telegram.ext import CommandHandler, ContextTypes
+
+# Ajoute cette fonction dans ton fichier
 async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -134,26 +138,19 @@ async def broadcast_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Tu dois répondre à une photo avec cette commande.")
         return
 
-    if len(context.args) == 0:
-        await update.message.reply_text("❌ Tu dois écrire un texte après la commande.")
+    try:
+        caption = update.message.text.split(' ', 1)[1]  # Récupère le texte après la commande
+    except IndexError:
+        await update.message.reply_text("❌ Tu dois ajouter un message après la commande.")
         return
 
-    caption = ' '.join(context.args)
     photo = update.message.reply_to_message.photo[-1].file_id
 
-    success = 0
     for user_id in user_ids:
         try:
             await context.bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
-            success += 1
-        except Exception as e:
-            print(f"Erreur avec l'utilisateur {user_id}: {e}")
+        except:
             pass
-
-    await update.message.reply_text(f"✅ Message envoyé à {success} abonnés.")
-
-# N'oublie pas d'enregistrer le handler :
-app.add_handler(CommandHandler("broadcast_image", broadcast_image))
 
 # main
 def main():
@@ -162,6 +159,7 @@ def main():
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(CommandHandler("stats", admin_stats))
     app.add_handler(CommandHandler("broadcast", admin_broadcast))
+    app.add_handler(CommandHandler("broadcast_image", broadcast_image))
     logger.info("Bot lancé.")
     app.run_polling()
 
