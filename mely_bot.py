@@ -1,96 +1,84 @@
-import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
+import json
+import os
 
-# === CONFIG ===
+# ========== CONFIG ==========
 TOKEN = "7714076813:AAEDEukD5q88c9mUHnvl0xEoN-5mQr-XQJ0"
-ADMIN_IDS = [21485]  # Remplace par ton propre ID Telegram
-FILE_ID_PHOTO = "INSÈRE_IÇI_TON_FILE_ID"  # A remplacer après avoir fait /get_file_id
+DATA_FILE = "users.json"
+IMAGE_FILE_ID = "YOUR_FILE_ID_HERE"  # <-- remplace ça après avoir fait /get_file_id
+INSTAGRAM_LINKS = [
+    ("📸 Insta 1", "https://instagram.com/1"),
+    ("📸 Insta 2", "https://instagram.com/2"),
+    ("📸 Insta 3", "https://instagram.com/3"),
+    ("📸 Insta 4", "https://instagram.com/4"),
+    ("📸 Insta 5", "https://instagram.com/5"),
+]
 
-# === LOGGING ===
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+# ========== UTILS ==========
+def load_users():
+    if not os.path.exists(DATA_FILE):
+        return {}
+    with open(DATA_FILE, "r") as f:
+        return json.load(f)
 
-# === STOCKAGE UTILISATEURS ===
-user_ids = set()
+def save_users(users):
+    with open(DATA_FILE, "w") as f:
+        json.dump(users, f)
 
-# === MESSAGES ===
-MESSAGES = {
-    "welcome": "Hey bébé 😘 Clique sur un de mes nouveaux Insta 🔥👇",
-    "help_admin": "/stats - Voir le nombre d’utilisateurs\n/broadcast - Envoyer un message à tous\n/get_file_id - Récupérer le file_id d’une photo"
-}
+# ========== HANDLERS ==========
 
-# === HANDLERS ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    user_ids.add(user_id)
-    keyboard = [
-        [InlineKeyboardButton("📸 Insta 1", url="https://instagram.com/")],
-        [InlineKeyboardButton("📸 Insta 2", url="https://instagram.com/")],
-        [InlineKeyboardButton("📸 Insta 3", url="https://instagram.com/")],
-        [InlineKeyboardButton("📸 Insta 4", url="https://instagram.com/")],
-        [InlineKeyboardButton("📸 Insta 5", url="https://instagram.com/")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    welcome_text = MESSAGES["welcome"]
+    user_id = str(update.effective_user.id)
+    users = load_users()
+    if user_id not in users:
+        users[user_id] = {"active": True}
+        save_users(users)
 
-    try:
-        await update.message.reply_photo(
-            photo=FILE_ID_PHOTO,
-            caption=welcome_text,
-            reply_markup=reply_markup
-        )
-    except Exception as e:
-        logger.error(f"Erreur envoi photo: {e}")
-        await update.message.reply_text(welcome_text, reply_markup=reply_markup)
+    # Envoie des boutons
+    keyboard = [[InlineKeyboardButton(text, url=url)] for text, url in INSTAGRAM_LINKS]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text("Hey bebe 😘 Clique sur un de mes nouveaux Insta 🔥👇", reply_markup=reply_markup)
+    await update.message.reply_text("✅ C’est fait, envoie la surprise 🔥")
+
+    # Envoie de l'image surprise
+    await context.bot.send_photo(chat_id=update.effective_chat.id, photo=IMAGE_FILE_ID)
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id in ADMIN_IDS:
-        total = len(user_ids)
-        active = sum(1 for uid in user_ids)
-        await update.message.reply_text(f"📊 Total : {total} utilisateurs\n✅ Actifs : {active}")
-    else:
-        await update.message.reply_text("Accès refusé.")
-
-async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id not in ADMIN_IDS:
-        return await update.message.reply_text("Accès refusé.")
-    if not context.args:
-        return await update.message.reply_text("Utilise : /broadcast ton_message")
-
-    message = " ".join(context.args)
-    sent = 0
-    for uid in user_ids:
-        try:
-            await context.bot.send_message(chat_id=uid, text=message)
-            sent += 1
-        except:
-            continue
-    await update.message.reply_text(f"📨 Message envoyé à {sent} utilisateurs.")
-
-async def help_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id in ADMIN_IDS:
-        await update.message.reply_text(MESSAGES["help_admin"])
+    user_id = str(update.effective_user.id)
+    if user_id != "YOUR_TELEGRAM_ID":
+        await update.message.reply_text("🚫 Tu n’as pas la permission.")
+        return
+    users = load_users()
+    total = len(users)
+    active = sum(1 for u in users.values() if u.get("active"))
+    await update.message.reply_text(f"📊 Total : {total} utilisateurs\n✅ Actifs : {active}")
 
 async def get_file_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.photo:
-        photo = update.message.photo[-1]
-        await update.message.reply_text(f"file_id : {photo.file_id}")
+        file_id = update.message.photo[-1].file_id
+        await update.message.reply_text(f"📷 Photo file_id:\n`{file_id}`", parse_mode='Markdown')
+    elif update.message.document and update.message.document.mime_type.startswith('image/'):
+        file_id = update.message.document.file_id
+        await update.message.reply_text(f"📁 Document image file_id:\n`{file_id}`", parse_mode='Markdown')
     else:
-        await update.message.reply_text("Aucune image détectée.")
+        await update.message.reply_text("❌ Aucune image détectée. Envoie une photo ou une image en document.")
 
-# === MAIN ===
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+# ========== MAIN ==========
 def main():
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("stats", stats))
-    app.add_handler(CommandHandler("broadcast", broadcast))
-    app.add_handler(CommandHandler("help_admin", help_admin))
-    app.add_handler(CommandHandler("get_file_id", get_file_id))
-    app.add_handler(MessageHandler(filters.COMMAND, help_admin))
-    app.run_polling()
+    application = Application.builder().token(TOKEN).build()
+
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("stats", stats))
+    application.add_handler(MessageHandler(filters.PHOTO | filters.Document.IMAGE, get_file_id))
+    application.add_handler(CallbackQueryHandler(button))
+
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
